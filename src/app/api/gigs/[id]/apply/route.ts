@@ -31,7 +31,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     throw e;
   }
 
-  const application = db.prepare(
+  const application = await db.prepare(
     'SELECT * FROM gig_applications WHERE gig_id = ? AND user_id = ?'
   ).get(gigId, auth.userId);
 

@@ -7,7 +7,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const postId = parseInt(params.id);
-  const existing = db.prepare(
+  const existing = await db.prepare(
     'SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?'
   ).get(auth.userId, postId);
 

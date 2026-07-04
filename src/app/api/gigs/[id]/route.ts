@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const gigId = parseInt(params.id);
-  const gig = db.prepare(`
+  const gig = await db.prepare(`
     SELECT g.*, u.first_name, u.last_name, u.profile_photo, u.headline as poster_headline, u.id as poster_user_id
     FROM gigs g JOIN users u ON g.poster_id = u.id WHERE g.id = ?
   `).get(gigId) as Record<string, unknown> | undefined;
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (!gig) return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
 
   // Check if current user has applied
-  const application = db.prepare(
+  const application = await db.prepare(
     'SELECT * FROM gig_applications WHERE gig_id = ? AND user_id = ?'
   ).get(gigId, auth.userId);
 
@@ -42,7 +42,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   if (existing.poster_id !== auth.userId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const body = await request.json();
-  db.prepare(`
+  await db.prepare(`
     UPDATE gigs SET title = COALESCE(?, title), description = COALESCE(?, description),
     venue = COALESCE(?, venue), location = COALESCE(?, location), gig_date = COALESCE(?, gig_date),
     gig_time = COALESCE(?, gig_time), pay_min = COALESCE(?, pay_min), pay_max = COALESCE(?, pay_max),

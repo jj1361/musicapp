@@ -6,7 +6,7 @@ export async function GET() {
   const auth = getAuthUser();
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const conversations = db.prepare(`
+  const conversations = await db.prepare(`
     SELECT c.*,
       u.id as other_user_id, u.first_name, u.last_name, u.profile_photo, u.headline,
       (SELECT content FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message,

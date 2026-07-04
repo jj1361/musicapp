@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
   const whereStr = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
 
-  const gigs = db.prepare(`
+  const gigs = await db.prepare(`
     SELECT g.*, u.first_name, u.last_name, u.profile_photo, u.headline as poster_headline
     FROM gigs g JOIN users u ON g.poster_id = u.id
     ${whereStr}

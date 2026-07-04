@@ -7,31 +7,31 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const userId = parseInt(params.id);
-  const user = db.prepare(
+  const user = await db.prepare(
     'SELECT id, email, first_name, last_name, headline, bio, location, profile_photo, cover_photo, phone, website, youtube_url, soundcloud_url, spotify_url, instagram_url, availability, account_type, created_at FROM users WHERE id = ?'
   ).get(userId);
 
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-  const skills = db.prepare(
+  const skills = await db.prepare(
     'SELECT s.id, s.name FROM skills s JOIN user_skills us ON s.id = us.skill_id WHERE us.user_id = ?'
   ).all(userId);
 
-  const genres = db.prepare(
+  const genres = await db.prepare(
     'SELECT g.id, g.name FROM genres g JOIN user_genres ug ON g.id = ug.genre_id WHERE ug.user_id = ?'
   ).all(userId);
 
-  const experiences = db.prepare(
+  const experiences = await db.prepare(
     'SELECT * FROM experiences WHERE user_id = ? ORDER BY start_date DESC'
   ).all(userId);
 
-  const connectionCount = db.prepare(
+  const connectionCount = await db.prepare(
     "SELECT COUNT(*) as count FROM connections WHERE (requester_id = ? OR recipient_id = ?) AND status = 'accepted'"
   ).get(userId, userId) as { count: number };
 
   // Check connection status with current user
   let connectionStatus = 'none';
-  const conn = db.prepare(
+  const conn = await db.prepare(
     'SELECT * FROM connections WHERE (requester_id = ? AND recipient_id = ?) OR (requester_id = ? AND recipient_id = ?)'
   ).get(auth.userId, userId, userId, auth.userId) as Record<string, unknown> | undefined;
 
@@ -81,7 +81,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   `);
 
   await db.transaction(async () => {
-    updateUser.run(
+    await updateUser.run(
       firstName, lastName, headline, bio, location, phone, website,
       youtubeUrl, soundcloudUrl, spotifyUrl, instagramUrl, availability, profilePhoto, userId
     );
@@ -105,7 +105,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
   });
 
-  const user = db.prepare(
+  const user = await db.prepare(
     'SELECT id, email, first_name, last_name, headline, bio, location, profile_photo, cover_photo, phone, website, youtube_url, soundcloud_url, spotify_url, instagram_url, availability, account_type, created_at, updated_at FROM users WHERE id = ?'
   ).get(userId);
 

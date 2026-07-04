@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   let connections;
   if (status === 'pending') {
     // Incoming requests only
-    connections = db.prepare(`
+    connections = await db.prepare(`
       SELECT c.*, u.id as user_id, u.first_name, u.last_name, u.profile_photo, u.headline, u.location
       FROM connections c
       JOIN users u ON c.requester_id = u.id
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       ORDER BY c.created_at DESC
     `).all(auth.userId);
   } else if (status === 'sent') {
-    connections = db.prepare(`
+    connections = await db.prepare(`
       SELECT c.*, u.id as user_id, u.first_name, u.last_name, u.profile_photo, u.headline, u.location
       FROM connections c
       JOIN users u ON c.recipient_id = u.id
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       ORDER BY c.created_at DESC
     `).all(auth.userId);
   } else {
-    connections = db.prepare(`
+    connections = await db.prepare(`
       SELECT c.*,
         u.id as user_id, u.first_name, u.last_name, u.profile_photo, u.headline, u.location
       FROM connections c
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   }
 
   // Check existing connection in either direction
-  const existing = db.prepare(
+  const existing = await db.prepare(
     'SELECT * FROM connections WHERE (requester_id = ? AND recipient_id = ?) OR (requester_id = ? AND recipient_id = ?)'
   ).get(auth.userId, recipientId, recipientId, auth.userId);
 

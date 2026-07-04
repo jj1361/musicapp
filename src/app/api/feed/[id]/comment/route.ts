@@ -6,7 +6,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const auth = getAuthUser();
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const comments = db.prepare(`
+  const comments = await db.prepare(`
     SELECT c.*, u.first_name, u.last_name, u.profile_photo, u.headline
     FROM comments c JOIN users u ON c.author_id = u.id
     WHERE c.post_id = ? ORDER BY c.created_at ASC
@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     await db.prepare('UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?').run(postId);
   });
 
-  const comments = db.prepare(`
+  const comments = await db.prepare(`
     SELECT c.*, u.first_name, u.last_name, u.profile_photo, u.headline
     FROM comments c JOIN users u ON c.author_id = u.id
     WHERE c.post_id = ? ORDER BY c.created_at ASC

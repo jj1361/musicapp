@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
   const offset = (page - 1) * limit;
 
-  const posts = db.prepare(`
+  const posts = await db.prepare(`
     SELECT p.*, u.first_name, u.last_name, u.headline, u.profile_photo,
       (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id AND user_id = ?) as user_liked
     FROM posts p
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     LIMIT ? OFFSET ?
   `).all(auth.userId, auth.userId, auth.userId, auth.userId, auth.userId, limit, offset);
 
-  const { total } = db.prepare(`
+  const { total } = await db.prepare(`
     SELECT COUNT(*) as total FROM posts p
     WHERE p.author_id = ?
       OR p.author_id IN (

@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ user: null }, { status: 200 });
   }
 
-  const user = db.prepare(
+  const user = await db.prepare(
     'SELECT id, email, first_name, last_name, headline, bio, location, profile_photo, cover_photo, phone, website, youtube_url, soundcloud_url, spotify_url, instagram_url, availability, account_type, created_at, updated_at FROM users WHERE id = ?'
   ).get(auth.userId);
 

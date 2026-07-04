@@ -14,19 +14,19 @@ export async function GET(request: Request, { params }: { params: { conversation
     const userId = searchParams.get('userId');
     if (!userId) return NextResponse.json({ messages: [], otherUser: null });
 
-    const otherUser = db.prepare(
+    const otherUser = await db.prepare(
       'SELECT id, first_name, last_name, profile_photo, headline FROM users WHERE id = ?'
     ).get(parseInt(userId));
 
     // Check if conversation already exists
     const minId = Math.min(auth.userId, parseInt(userId));
     const maxId = Math.max(auth.userId, parseInt(userId));
-    const existing = db.prepare(
+    const existing = await db.prepare(
       'SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?'
     ).get(minId, maxId) as { id: number } | undefined;
 
     if (existing) {
-      const messages = db.prepare(
+      const messages = await db.prepare(
         'SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at ASC'
       ).all(existing.id);
       return NextResponse.json({ messages, otherUser, conversationId: existing.id });
@@ -42,16 +42,16 @@ export async function GET(request: Request, { params }: { params: { conversation
   }
 
   // Mark messages as read
-  db.prepare(
+  await db.prepare(
     'UPDATE messages SET read = 1 WHERE conversation_id = ? AND sender_id != ? AND read = 0'
   ).run(parseInt(convId), auth.userId);
 
-  const messages = db.prepare(
+  const messages = await db.prepare(
     'SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at ASC'
   ).all(parseInt(convId));
 
   const otherUserId = conversation.user1_id === auth.userId ? conversation.user2_id : conversation.user1_id;
-  const otherUser = db.prepare(
+  const otherUser = await db.prepare(
     'SELECT id, first_name, last_name, profile_photo, headline FROM users WHERE id = ?'
   ).get(otherUserId);
 
@@ -72,7 +72,7 @@ export async function POST(request: Request, { params }: { params: { conversatio
     const minId = Math.min(auth.userId, recipientId);
     const maxId = Math.max(auth.userId, recipientId);
 
-    const existing = db.prepare(
+    const existing = await db.prepare(
       'SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?'
     ).get(minId, maxId) as { id: number } | undefined;
 
@@ -96,7 +96,7 @@ export async function POST(request: Request, { params }: { params: { conversatio
   await db.prepare('INSERT INTO messages (conversation_id, sender_id, content) VALUES (?, ?, ?)').run(convId, auth.userId, content);
   await db.prepare("UPDATE conversations SET last_message_at = datetime('now') WHERE id = ?").run(convId);
 
-  const messages = db.prepare(
+  const messages = await db.prepare(
     'SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at ASC'
   ).all(convId);
 
