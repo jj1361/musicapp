@@ -191,7 +191,8 @@ function createSqliteDatabase(): DatabaseAdapter {
   }
 
   const require = createRequire(import.meta.url);
-  const Sqlite3 = require('better-sqlite3');
+  const moduleName = 'better-sqlite3';
+  const Sqlite3 = require(moduleName);
   const rawDb = new Sqlite3(DB_PATH);
   return new SqliteDatabase(rawDb);
 }

@@ -45,6 +45,15 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
     fetchGig();
   };
 
+  const handleApplicationStatus = async (applicationId: number, status: 'accepted' | 'rejected') => {
+    await fetch(`/api/gigs/${params.id}/applications/${applicationId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    fetchGig();
+  };
+
   if (loading) return <PostSkeleton />;
   if (!gig) return <p className="text-center py-8 text-gray-500">Gig not found</p>;
 
@@ -136,9 +145,20 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
                   <p className="text-xs text-gray-500 dark:text-gray-400">{app.headline as string}</p>
                   {app.message ? <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{app.message as string}</p> : null}
                 </div>
-                <Badge variant={app.status === 'pending' ? 'accent' : app.status === 'accepted' ? 'secondary' : 'default'}>
-                  {app.status as string}
-                </Badge>
+                {app.status === 'pending' ? (
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" onClick={() => handleApplicationStatus(app.id as number, 'rejected')}>
+                      Reject
+                    </Button>
+                    <Button onClick={() => handleApplicationStatus(app.id as number, 'accepted')}>
+                      Accept
+                    </Button>
+                  </div>
+                ) : (
+                  <Badge variant={app.status === 'accepted' ? 'secondary' : 'default'}>
+                    {app.status as string}
+                  </Badge>
+                )}
               </div>
             ))}
           </div>
