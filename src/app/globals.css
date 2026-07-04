@@ -2,26 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-page-light dark:bg-page-dark text-gray-900 dark:text-gray-100 font-sans;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .nav-icon {
+    @apply flex flex-col items-center justify-center px-3 py-1 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light transition-colors cursor-pointer;
+  }
+
+  .nav-icon.active {
+    @apply text-primary dark:text-primary-light border-b-2 border-primary;
+  }
+
+  .nav-icon svg {
+    @apply w-6 h-6;
+  }
+
+  .nav-icon span {
+    @apply text-[10px] mt-0.5;
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
 }
